@@ -4,6 +4,8 @@
 
 GET     /                                       Application.Index
 
+GET     /v1/data.tsv                            Api.DataTsv
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
