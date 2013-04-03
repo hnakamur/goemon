@@ -9,3 +9,8 @@ type Application struct {
 func (c Application) Index() revel.Result {
 	return c.Render()
 }
+
+func (c Application) Chart() revel.Result {
+	query := c.Request.URL.RawQuery
+	return c.Render(query)
+}

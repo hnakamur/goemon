@@ -4,6 +4,8 @@
 
 GET     /                                       Application.Index
 
+GET     /chart                                  Application.Chart
+
 GET     /v1/data.tsv                            Api.DataTsv
 
 # Ignore favicon requests
