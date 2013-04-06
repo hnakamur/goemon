@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="./public/css/nv.d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+svg {
+  display: block;
+}
+
+#chart1 svg {
+  height: 500px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  margin: 50px;
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+
+  <div id="chart1">
+    <svg style="height: 500px;"></svg>
+  </div>
+
+<script src="./public/js/d3.v3.js"></script>
+<script src="./public/js/nv.d3.js"></script>
+<script>
+
+
+
+function rejectNaN(data) {
+  var result = [];
+  for (var i = 0, len = data.length; i < len; ++i) {
+    var d = data[i];
+    if (!isNaN(d.y))
+      result.push(d);
+  }
+  return result;
+}
+
+// Wrapping in nv.addGraph allows for '0 timeout render', stores rendered charts in nv.graphs, and may do more in the future... it's NOT required
+var chart;
+
+nv.addGraph(function() {
+  chart = nv.models.lineChart();
+
+  chart
+      .x(function(d,i) { return d.x })
+
+
+  chart.xAxis // chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
+      .ticks(d3.time.hours, 2)
+      .tickSubdivide(1)
+      .tickFormat(function(d) {
+        return d3.time.format('%a %H:%M')(new Date(d))
+      });
+
+  chart.yAxis
+      .axisLabel('Voltage (v)')
+      .tickSubdivide(1)
+      .tickFormat(d3.format(',.2f'));
+
+  d3.tsv("v1/data.tsv?{{.query}}", function(error, data) {
+    d3.select('#chart1 svg')
+        .datum([
+          {
+            values: rejectNaN(data),
+            key: "rrd value",
+            color: "#2ca02c"
+          }
+        ])
+      .transition().duration(500)
+        .call(chart);
+    
+  }).row(function(d) { return {x: +d.date, y: +d.value}; })
+
+
+  //TODO: Figure out a good way to do this automatically
+  nv.utils.windowResize(chart.update);
+  //nv.utils.windowResize(function() { d3.select('#chart1 svg').call(chart) });
+
+  chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+  return chart;
+});
+
+</script>

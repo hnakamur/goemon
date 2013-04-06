@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"time"
 	"github.com/robfig/revel"
@@ -16,17 +15,28 @@ type RrdFetchTsvResult struct {
 }
 
 func (r RrdFetchTsvResult) Apply(req *revel.Request, resp *revel.Response) {
+	revel.TRACE.Printf("Apply start\n")
 	resp.WriteHeader(http.StatusOK, "text/tab-separated-values")
 
 	resp.Out.Write([]byte("date\tvalue\n"))
 	data := r.data
-	start := data.Start.Unix() * 1000
-	step := int64(data.Step.Seconds() * 1000)
+	row := 0
+	for ti := data.Start.Add(data.Step);
+		ti.Before(data.End) || ti.Equal(data.End);
+		ti = ti.Add(data.Step) {
+		v := data.ValueAt(0, row)
+		line := fmt.Sprintf("%d\t%e\n", ti.Unix(), v)
+		resp.Out.Write([]byte(line))
+		row++
+	}
+	revel.TRACE.Printf("Apply exit\n")
+/*
 	origStep := r.origStep * 1000
 	jStep := origStep / int(step)
 	if jStep < 1 {
 		jStep = 1
 	}
+
 	// TODO: Calculate max, average and such if jStep > 1
 	revel.TRACE.Printf("jStep=%d, step=%d, origStep=%d\n", jStep, step, origStep)
 	for j := 0; j < data.RowLen; j += jStep {
@@ -38,6 +48,7 @@ func (r RrdFetchTsvResult) Apply(req *revel.Request, resp *revel.Response) {
 		line := fmt.Sprintf("%d\t%e\n", t, v)
 		resp.Out.Write([]byte(line))
 	}
+*/
 }
 
 type Api struct {
@@ -55,20 +66,25 @@ func (c Api) DataTsv(path, cf string, start, end time.Time, step int) revel.Resu
 		cf = "AVERAGE";
 	}
 
+	revel.TRACE.Printf("DataTsv start=%s, end=%s, step=%d", start, end, step)
 	if end.IsZero() {
 		end = time.Now()
+		revel.TRACE.Printf("DataTsv end was zero, now %s", end)
 	}
 	if start.IsZero() {
-		start = end.Add(-24 * time.Hour)
+		start = end.Add(-36 * time.Hour)
+		revel.TRACE.Printf("DataTsv start was zero, now %s", start)
 	}
 
 	if step == 0 {
 		step = 60;
+		revel.TRACE.Printf("DataTsv step was zero, now %d", step)
 	}
 	stepDuration := time.Duration(step) * time.Second
 
     data, err := rrd.Fetch(rrdpath, cf, start, end, stepDuration)
     if err != nil {
+		revel.TRACE.Printf("Fetch fails %s", err)
 		return c.RenderError(err)
     }
 	defer data.FreeValues()
