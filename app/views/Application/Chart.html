@@ -86,7 +86,7 @@ nv.addGraph(function() {
       .transition().duration(500)
         .call(chart);
     
-  }).row(function(d) { return {x: +d.date, y: +d.value}; })
+  }).row(function(d) { return {x: 1000 * d.date, y: +d.value}; })
 
 
   //TODO: Figure out a good way to do this automatically
