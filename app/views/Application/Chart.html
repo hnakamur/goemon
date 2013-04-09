@@ -2,6 +2,8 @@
 <meta charset="utf-8">
 
 <link href="./public/css/nv.d3.css" rel="stylesheet" type="text/css">
+<link href="./public/css/bootstrap.css" rel="stylesheet">
+<link href="./public/css/bootstrap-responsive.css" rel="stylesheet">
 
 <style>
 
@@ -29,6 +31,9 @@ svg {
 */
 }
 
+#date_move_left_ctl {
+  margin-left: 20px;
+}
 </style>
 <body>
 
@@ -36,6 +41,74 @@ svg {
     <svg style="height: 500px;"></svg>
   </div>
 
+<form class="form-inline">
+  <div id="date_range_ctl" class="btn-group">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+      1h
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a href="#">1h</a></li>
+      <li><a href="#">2h</a></li>
+      <li><a href="#">3h</a></li>
+      <li><a href="#">6h</a></li>
+      <li><a href="#">12h</a></li>
+      <li><a href="#">1d</a></li>
+      <li><a href="#">7d</a></li>
+      <li><a href="#">14d</a></li>
+      <li><a href="#">1m</a></li>
+      <li><a href="#">3m</a></li>
+      <li><a href="#">6m</a></li>
+      <li><a href="#">1y</a></li>
+      <li><a href="#">all</a></li>
+    </ul>
+  </div>
+
+  <div id="date_move_left_ctl" class="btn-group">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+      &larr;
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a href="#">&larr;1h</a></li>
+      <li><a href="#">&larr;2h</a></li>
+      <li><a href="#">&larr;3h</a></li>
+      <li><a href="#">&larr;6h</a></li>
+      <li><a href="#">&larr;12h</a></li>
+      <li><a href="#">&larr;1d</a></li>
+      <li><a href="#">&larr;7d</a></li>
+      <li><a href="#">&larr;14d</a></li>
+      <li><a href="#">&larr;1m</a></li>
+      <li><a href="#">&larr;3m</a></li>
+      <li><a href="#">&larr;6m</a></li>
+      <li><a href="#">&larr;1y</a></li>
+    </ul>
+  </div>
+
+  <div id="date_move_right_ctl" class="btn-group">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+      &rarr;
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a href="#">1h&rarr;</a></li>
+      <li><a href="#">2h&rarr;</a></li>
+      <li><a href="#">3h&rarr;</a></li>
+      <li><a href="#">6h&rarr;</a></li>
+      <li><a href="#">12h&rarr;</a></li>
+      <li><a href="#">1d&rarr;</a></li>
+      <li><a href="#">7d&rarr;</a></li>
+      <li><a href="#">14d&rarr;</a></li>
+      <li><a href="#">1m&rarr;</a></li>
+      <li><a href="#">3m&rarr;</a></li>
+      <li><a href="#">6m&rarr;</a></li>
+      <li><a href="#">1y&rarr;</a></li>
+    </ul>
+  </div>
+</form>
+
+<script src="./public/js/jquery-1.9.1.min.js"></script>
+<script src="./public/js/bootstrap.min.js"></script>
 <script src="./public/js/d3.v3.js"></script>
 <script src="./public/js/nv.d3.js"></script>
 <script>
