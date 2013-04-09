@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 	"github.com/robfig/revel"
-	"github.com/hnakamur/rrd"
+	"github.com/ziutek/rrd"
 )
 
 type RrdFetchTsvResult struct {
