@@ -40,7 +40,18 @@ func (c Application) Chart(path, cf, duration string, end time.Time) revel.Resul
 
 	durations := strings.Split(durationsStr, ",")
 	shiftDurations := strings.Split(shiftDurationsStr, ",")
-	return c.Render(path, cf, duration, endUnix, durations, shiftDurations)
+
+	topDir, found := revel.Config.String("rrd.data_dir")
+	if !found {
+		return c.RenderError(errors.New("config rrd.data_dir not found"))
+	}
+
+	infos, err := dir.FindRrdFiles(topDir)
+	if err != nil {
+		return c.RenderError(err)
+	}
+
+	return c.Render(path, cf, duration, endUnix, durations, shiftDurations, infos)
 }
 
 func (c Application) Files() revel.Result {

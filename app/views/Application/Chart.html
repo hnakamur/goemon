@@ -43,9 +43,6 @@ svg {
 <form class="form-inline">
 {{$path := .path}}
 {{$endUnix := .endUnix}}
-  <input type="hidden" name="path" value="{{.path}}" id="path"></input>
-  <input type="hidden" name="duration" value="{{.duration}}" id="duration"></input>
-  <input type="hidden" name="end" value="{{.endUnix}}" id="end"></input>
   <div id="date_range_ctl" class="btn-group">
     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
       &larr;&rarr;
@@ -82,7 +79,9 @@ svg {
     </ul>
   </div>
 
-  <a href="files">rrd files</a>
+  <input id="path" type="text" value="{{.path}}" data-provide="typeahead" data-source='[{{range $i, $e := .infos}}{{if $i}},{{end}}"{{$e.Name}}"{{end}}]'>
+  <input type="hidden" name="duration" value="{{.duration}}" id="duration"></input>
+  <input type="hidden" name="end" value="{{.endUnix}}" id="end"></input>
 </form>
 
   <div id="chart1">
@@ -203,4 +202,12 @@ function newer(duration) {
   location.href = 'chart?path=' + $('#path').val()
     + '&duration=' + $('#duration').val() + '&end=' + end;
 }
+
+$(function() {
+  $('form').submit(function() {
+    location.href = 'chart?path=' + $('#path').val()
+      + '&duration=' + $('#duration').val() + '&end=' + $('#end').val();
+    return false;
+  });
+});
 </script>
