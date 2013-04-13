@@ -5,8 +5,11 @@
 GET     /                                       Application.Index
 
 GET     /chart                                  Application.Chart
+GET     /files                                  Application.Files
 
 GET     /v1/data.tsv                            Api.DataTsv
+
+GET     /v1/files                               Api.Files
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

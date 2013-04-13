@@ -34,33 +34,27 @@ svg {
 #date_move_left_ctl {
   margin-left: 20px;
 }
+#date_move_right_ctl {
+  margin-right: 20px;
+}
 </style>
 <body>
 
-  <div id="chart1">
-    <svg style="height: 500px;"></svg>
-  </div>
-
 <form class="form-inline">
+{{$path := .path}}
+{{$endUnix := .endUnix}}
+  <input type="hidden" name="path" value="{{.path}}" id="path"></input>
+  <input type="hidden" name="duration" value="{{.duration}}" id="duration"></input>
+  <input type="hidden" name="end" value="{{.endUnix}}" id="end"></input>
   <div id="date_range_ctl" class="btn-group">
     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-      1h
+      &larr;&rarr;
       <span class="caret"></span>
     </a>
     <ul class="dropdown-menu">
-      <li><a href="#">1h</a></li>
-      <li><a href="#">2h</a></li>
-      <li><a href="#">3h</a></li>
-      <li><a href="#">6h</a></li>
-      <li><a href="#">12h</a></li>
-      <li><a href="#">1d</a></li>
-      <li><a href="#">7d</a></li>
-      <li><a href="#">14d</a></li>
-      <li><a href="#">1m</a></li>
-      <li><a href="#">3m</a></li>
-      <li><a href="#">6m</a></li>
-      <li><a href="#">1y</a></li>
-      <li><a href="#">all</a></li>
+      {{range .durations}}
+      <li><a href="chart?path={{$path}}&end={{$endUnix}}&duration={{.}}">{{.}}</a></li>
+      {{end}}
     </ul>
   </div>
 
@@ -70,18 +64,9 @@ svg {
       <span class="caret"></span>
     </a>
     <ul class="dropdown-menu">
-      <li><a href="#">&larr;1h</a></li>
-      <li><a href="#">&larr;2h</a></li>
-      <li><a href="#">&larr;3h</a></li>
-      <li><a href="#">&larr;6h</a></li>
-      <li><a href="#">&larr;12h</a></li>
-      <li><a href="#">&larr;1d</a></li>
-      <li><a href="#">&larr;7d</a></li>
-      <li><a href="#">&larr;14d</a></li>
-      <li><a href="#">&larr;1m</a></li>
-      <li><a href="#">&larr;3m</a></li>
-      <li><a href="#">&larr;6m</a></li>
-      <li><a href="#">&larr;1y</a></li>
+      {{range .durations}}
+      <li><a href="javascript:older('{{.}}')">&larr;{{.}}</a></li>
+      {{end}}
     </ul>
   </div>
 
@@ -91,21 +76,18 @@ svg {
       <span class="caret"></span>
     </a>
     <ul class="dropdown-menu">
-      <li><a href="#">1h&rarr;</a></li>
-      <li><a href="#">2h&rarr;</a></li>
-      <li><a href="#">3h&rarr;</a></li>
-      <li><a href="#">6h&rarr;</a></li>
-      <li><a href="#">12h&rarr;</a></li>
-      <li><a href="#">1d&rarr;</a></li>
-      <li><a href="#">7d&rarr;</a></li>
-      <li><a href="#">14d&rarr;</a></li>
-      <li><a href="#">1m&rarr;</a></li>
-      <li><a href="#">3m&rarr;</a></li>
-      <li><a href="#">6m&rarr;</a></li>
-      <li><a href="#">1y&rarr;</a></li>
+      {{range .durations}}
+      <li><a href="javascript:newer('{{.}}')">{{.}}&rarr;</a></li>
+      {{end}}
     </ul>
   </div>
+
+  <a href="files">rrd files</a>
 </form>
+
+  <div id="chart1">
+    <svg style="height: 400px;"></svg>
+  </div>
 
 <script src="./public/js/jquery-1.9.1.min.js"></script>
 <script src="./public/js/bootstrap.min.js"></script>
@@ -147,7 +129,7 @@ nv.addGraph(function() {
       .tickSubdivide(1)
       .tickFormat(d3.format(',.2f'));
 
-  d3.tsv("v1/data.tsv?{{.query}}", function(error, data) {
+  d3.tsv("v1/data.tsv?path={{.path}}&cf={{.cf}}&duration={{.duration}}&end={{.endUnix}}", function(error, data) {
     d3.select('#chart1 svg')
         .datum([
           {
@@ -171,4 +153,54 @@ nv.addGraph(function() {
   return chart;
 });
 
+var re = /(\d+(\.\d*)?|\.\d+)(Y|M|d|h)/g;
+var unitSecondsMap = {
+  Y: 366 * 24 * 3600,
+  M: 31 * 24 * 3600,
+  d: 24 * 3600,
+  h: 3600
+};
+
+function seconds(duration) {
+  var matches;
+  var seconds = 0;
+  while ((matches = re.exec(duration)) !== null) {
+    seconds += parseFloat(matches[1]) * unitSecondsMap[matches[3]];
+  }
+  return seconds;
+}
+
+function pad(number) {
+  var r = String(number);
+  return r.length === 1 ? '0' + r : r;
+}
+
+function formatDate(date) {
+  return date.getUTCFullYear()
+    + '-' + pad(date.getUTCMonth() + 1)
+    + '-' + pad(date.getUTCDate())
+    + ' ' + pad(date.getUTCHours())
+    + ':' + pad(date.getUTCMinutes());
+}
+
+function older(duration) {
+  console.log('older path=' + $('#path').val() + ', end=' + $('#end').val() + ', duration=' + duration + '!');
+  var end = $('#end').val();
+  end = end === '' ? new Date() : new Date(parseFloat(end) * 1000);
+console.log('end date=' + end);
+console.log('new end time=' + end.getTime() - seconds(duration) * 1000);
+  end = formatDate(new Date(end.getTime() - seconds(duration) * 1000));
+console.log('new end=' + end);
+  location.href = 'chart?path=' + $('#path').val()
+    + '&duration=' + $('#duration').val() + '&end=' + end;
+}
+
+function newer(duration) {
+  console.log("newer path=" + $("#path").val() + ", end=" + $("#end").val() + "!");
+  var end = $('#end').val();
+  end = end === '' ? new Date() : new Date(parseFloat(end) * 1000);
+  end = formatDate(new Date(end.getTime() + seconds(duration) * 1000));
+  location.href = 'chart?path=' + $('#path').val()
+    + '&duration=' + $('#duration').val() + '&end=' + end;
+}
 </script>
